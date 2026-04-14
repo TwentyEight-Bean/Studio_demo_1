@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Download, X, ChevronLeft, ChevronRight, ArrowLeft, ZoomIn } from "lucide-react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { projects, galleryImages } from "../data/projects";
+import { DEFAULT_ADMIN_PASSWORD, loadAlbumAccessConfig } from "@/lib/albumAccess";
 
 interface ClientGalleryProps {
   projectId: string;
@@ -14,6 +15,9 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
   const router = useRouter();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [heroLoaded, setHeroLoaded] = useState(false);
+  const [accessGranted, setAccessGranted] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const project = projects.find((p) => p.id === projectId) ?? projects[0];
 
@@ -40,13 +44,90 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [goNext, goPrev]);
 
+  const checkPassword = () => {
+    const config = loadAlbumAccessConfig();
+    const expectedPassword =
+      config.albumPasswords[project.id]?.trim() || config.adminPassword || DEFAULT_ADMIN_PASSWORD;
+
+    if (passwordInput === expectedPassword) {
+      setAccessGranted(true);
+      setPasswordError("");
+      return;
+    }
+
+    setPasswordError("Mật khẩu không chính xác. Vui lòng thử lại.");
+  };
+
+  if (!accessGranted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: "#2C3939", color: "#EAE6D8" }}>
+        <div
+          className="w-full max-w-md p-6 md:p-8"
+          style={{ backgroundColor: "#1F2828", border: "1px solid rgba(234,230,216,0.15)" }}
+        >
+          <p className="mb-2 opacity-45" style={{ fontSize: "0.62rem", letterSpacing: "0.24em" }}>
+            ALBUM PROTECTION
+          </p>
+          <h1 className="mb-6" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.9rem", fontWeight: 400 }}>
+            {project.coupleNames}
+          </h1>
+          <p className="mb-4 opacity-75" style={{ fontSize: "0.78rem", letterSpacing: "0.08em" }}>
+            Album này yêu cầu mật khẩu do ADMIN thiết lập.
+          </p>
+          <input
+            type="password"
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") checkPassword();
+            }}
+            placeholder="Nhập mật khẩu album"
+            className="w-full px-4 py-3 mb-3"
+            style={{
+              backgroundColor: "rgba(234,230,216,0.05)",
+              border: "1px solid rgba(234,230,216,0.2)",
+              outline: "none",
+            }}
+          />
+          {passwordError && <p className="mb-3 text-sm" style={{ color: "#fda4af" }}>{passwordError}</p>}
+          <div className="flex gap-3">
+            <button
+              onClick={() => router.push("/")}
+              className="px-4 py-3"
+              style={{
+                border: "1px solid rgba(234,230,216,0.25)",
+                fontSize: "0.68rem",
+                letterSpacing: "0.14em",
+              }}
+            >
+              QUAY LẠI
+            </button>
+            <button
+              onClick={checkPassword}
+              className="px-5 py-3"
+              style={{
+                backgroundColor: "#EAE6D8",
+                color: "#1F2828",
+                fontSize: "0.68rem",
+                letterSpacing: "0.16em",
+                fontWeight: 500,
+              }}
+            >
+              TRUY CẬP ALBUM
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-screen"
       style={{ backgroundColor: "#2C3939", fontFamily: "'Montserrat', sans-serif" }}
     >
       {/* HERO SECTION */}
-      <section className="relative overflow-hidden" style={{ height: "80vh" }}>
+      <section className="relative overflow-hidden h-[70vh] md:h-[80vh]">
         {/* Background Image */}
         <img
           src={project.coverImage}
@@ -68,11 +149,12 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
         {/* Back Button */}
         <button
           onClick={() => router.push("/")}
-          className="absolute top-8 left-8 flex items-center gap-3 transition-opacity duration-200 hover:opacity-60 z-10"
+          className="absolute top-5 left-4 md:top-8 md:left-8 flex items-center gap-2 md:gap-3 transition-opacity duration-200 hover:opacity-60 z-10"
           style={{ color: "#EAE6D8" }}
         >
           <ArrowLeft size={16} />
           <span
+            className="hidden sm:inline"
             style={{
               fontSize: "0.62rem",
               letterSpacing: "0.2em",
@@ -85,7 +167,7 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
         </button>
 
         {/* Hero Text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-8">
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 md:px-8">
           <p
             className="mb-4"
             style={{
@@ -104,7 +186,7 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
             style={{
               fontFamily: "'Playfair Display', serif",
               color: "#EAE6D8",
-              fontSize: "clamp(3rem, 8vw, 7rem)",
+              fontSize: "clamp(2.1rem, 9vw, 7rem)",
               fontWeight: 400,
               lineHeight: 1.05,
               letterSpacing: "0.02em",
@@ -115,10 +197,10 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
           </h1>
 
           <div
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 md:gap-4"
             style={{ color: "#EAE6D8", opacity: 0.55 }}
           >
-            <div className="h-px w-12" style={{ backgroundColor: "#EAE6D8", opacity: 0.4 }} />
+            <div className="h-px w-8 md:w-12" style={{ backgroundColor: "#EAE6D8", opacity: 0.4 }} />
             <span
               style={{
                 fontSize: "0.7rem",
@@ -129,7 +211,7 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
             >
               {project.date}
             </span>
-            <div className="h-px w-12" style={{ backgroundColor: "#EAE6D8", opacity: 0.4 }} />
+            <div className="h-px w-8 md:w-12" style={{ backgroundColor: "#EAE6D8", opacity: 0.4 }} />
           </div>
 
           <p
@@ -173,16 +255,17 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
 
       {/* STICKY ACTION BAR */}
       <div
-        className="sticky top-0 z-30 flex items-center justify-between px-10 py-4"
+        className="sticky top-0 z-30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 md:px-10 py-3 md:py-4"
         style={{
           backgroundColor: "rgba(31,40,40,0.95)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid rgba(234,230,216,0.07)",
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto overflow-hidden">
           <div className="w-px h-5" style={{ backgroundColor: "#EAE6D8", opacity: 0.3 }} />
           <span
+            className="truncate"
             style={{
               fontFamily: "'Playfair Display', serif",
               color: "#EAE6D8",
@@ -209,7 +292,7 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
         </div>
 
         <button
-          className="flex items-center gap-3 px-6 py-2.5 transition-all duration-300 hover:opacity-80"
+          className="flex items-center justify-center gap-3 px-4 md:px-6 py-2.5 transition-all duration-300 hover:opacity-80 w-full sm:w-auto"
           style={{
             border: "1px solid rgba(234,230,216,0.3)",
             color: "#EAE6D8",
@@ -225,8 +308,8 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
       </div>
 
       {/* GALLERY SECTION */}
-      <section className="px-10 py-20">
-        <div className="mb-14">
+      <section className="px-4 md:px-10 py-12 md:py-20">
+        <div className="mb-8 md:mb-14">
           <p
             style={{
               color: "#EAE6D8",
@@ -269,7 +352,7 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
 
       {/* FOOTER */}
       <footer
-        className="text-center py-16"
+        className="text-center px-4 py-12 md:py-16"
         style={{ borderTop: "1px solid rgba(234,230,216,0.07)" }}
       >
         <p
@@ -297,6 +380,21 @@ export function ClientGallery({ projectId }: ClientGalleryProps) {
         >
           © 2025 IVY BRIDAL STUDIO — TẤT CẢ QUYỀN ĐỀU ĐƯỢC BẢO LƯU
         </p>
+        <button
+          onClick={() => router.push("/admin")}
+          className="mt-5 px-4 py-2 transition-opacity hover:opacity-70"
+          style={{
+            border: "1px solid rgba(234,230,216,0.2)",
+            color: "#EAE6D8",
+            opacity: 0.45,
+            fontSize: "0.58rem",
+            letterSpacing: "0.18em",
+            fontFamily: "'Montserrat', sans-serif",
+            fontWeight: 300,
+          }}
+        >
+          ADMIN DASHBOARD
+        </button>
       </footer>
 
       {/* LIGHTBOX */}
@@ -396,7 +494,7 @@ function Lightbox({ images, currentIndex, onClose, onNext, onPrev, onSelect }: L
     >
       {/* Top Bar */}
       <div
-        className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-6 z-10"
+        className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 md:px-8 py-4 md:py-6 z-10"
         style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -438,7 +536,7 @@ function Lightbox({ images, currentIndex, onClose, onNext, onPrev, onSelect }: L
 
       {/* Main Image */}
       <div
-        className="relative flex items-center justify-center w-full h-full px-20"
+        className="relative flex items-center justify-center w-full h-full px-4 md:px-20"
         onClick={(e) => e.stopPropagation()}
       >
         <img
@@ -471,7 +569,7 @@ function Lightbox({ images, currentIndex, onClose, onNext, onPrev, onSelect }: L
           e.stopPropagation();
           onPrev();
         }}
-        className="absolute left-6 top-1/2 -translate-y-1/2 p-3 transition-opacity duration-200 hover:opacity-60"
+        className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 p-2 md:p-3 transition-opacity duration-200 hover:opacity-60"
         style={{ color: "#EAE6D8", opacity: 0.5 }}
       >
         <ChevronLeft size={28} strokeWidth={1} />
@@ -482,7 +580,7 @@ function Lightbox({ images, currentIndex, onClose, onNext, onPrev, onSelect }: L
           e.stopPropagation();
           onNext();
         }}
-        className="absolute right-6 top-1/2 -translate-y-1/2 p-3 transition-opacity duration-200 hover:opacity-60"
+        className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 p-2 md:p-3 transition-opacity duration-200 hover:opacity-60"
         style={{ color: "#EAE6D8", opacity: 0.5 }}
       >
         <ChevronRight size={28} strokeWidth={1} />
@@ -490,11 +588,12 @@ function Lightbox({ images, currentIndex, onClose, onNext, onPrev, onSelect }: L
 
       {/* Bottom Bar */}
       <div
-        className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-8 py-6"
+        className="absolute bottom-0 left-0 right-0 flex items-center justify-between gap-3 px-4 md:px-8 py-4 md:py-6"
         style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6), transparent)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <p
+          className="truncate"
           style={{
             color: "#EAE6D8",
             opacity: 0.3,
@@ -509,7 +608,7 @@ function Lightbox({ images, currentIndex, onClose, onNext, onPrev, onSelect }: L
         </p>
 
         <button
-          className="flex items-center gap-2 px-5 py-2.5 transition-all duration-200 hover:opacity-80"
+          className="hidden sm:flex items-center gap-2 px-5 py-2.5 transition-all duration-200 hover:opacity-80"
           style={{
             border: "1px solid rgba(234,230,216,0.2)",
             color: "#EAE6D8",
@@ -526,7 +625,7 @@ function Lightbox({ images, currentIndex, onClose, onNext, onPrev, onSelect }: L
 
       {/* Thumbnail Strip */}
       <div
-        className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-1.5"
+        className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 flex gap-1.5"
         onClick={(e) => e.stopPropagation()}
       >
         {images.map((_, i) => (

@@ -38,9 +38,9 @@ export function AdminDashboard() {
         className="sticky top-0 z-40 border-b"
         style={{ backgroundColor: "#1F2828", borderColor: "rgba(234,230,216,0.08)" }}
       >
-        <div className="max-w-screen-xl mx-auto px-10 py-5 flex items-center justify-between">
+        <div className="max-w-screen-xl mx-auto px-4 md:px-10 py-4 md:py-5 flex flex-col md:flex-row gap-4 md:gap-0 md:items-center md:justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 self-start">
             <div
               className="w-px h-8"
               style={{ backgroundColor: "#EAE6D8", opacity: 0.4 }}
@@ -63,10 +63,25 @@ export function AdminDashboard() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-6">
+          <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 md:gap-6">
+            <button
+              onClick={() => router.push("/admin")}
+              className="px-4 py-3 transition-all duration-300 hover:opacity-80"
+              style={{
+                border: "1px solid rgba(234,230,216,0.25)",
+                color: "#EAE6D8",
+                fontSize: "0.65rem",
+                letterSpacing: "0.16em",
+                fontFamily: "'Montserrat', sans-serif",
+                fontWeight: 400,
+              }}
+            >
+              ADMIN DASHBOARD
+            </button>
+
             {/* Search */}
             <div
-              className="flex items-center gap-3 px-4 py-2 rounded-sm"
+              className="flex items-center gap-3 px-4 py-2 rounded-sm w-full md:w-auto"
               style={{ backgroundColor: "rgba(234,230,216,0.05)", border: "1px solid rgba(234,230,216,0.1)" }}
             >
               <Search size={14} style={{ color: "#EAE6D8", opacity: 0.4 }} />
@@ -84,7 +99,8 @@ export function AdminDashboard() {
                   letterSpacing: "0.12em",
                   fontFamily: "'Montserrat', sans-serif",
                   fontWeight: 300,
-                  width: "180px",
+                  width: "100%",
+                  maxWidth: "180px",
                 }}
               />
             </div>
@@ -92,7 +108,7 @@ export function AdminDashboard() {
             {/* Create button */}
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-6 py-3 transition-all duration-300 hover:opacity-90"
+              className="flex items-center justify-center gap-2 px-4 md:px-6 py-3 transition-all duration-300 hover:opacity-90"
               style={{
                 backgroundColor: "#EAE6D8",
                 color: "#1F2828",
@@ -110,9 +126,9 @@ export function AdminDashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-screen-xl mx-auto px-10 py-16">
+      <main className="max-w-screen-xl mx-auto px-4 md:px-10 py-10 md:py-16">
         {/* Section Header */}
-        <div className="flex items-end justify-between mb-14">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-14">
           <div>
             <p
               className="mb-3"
@@ -130,7 +146,7 @@ export function AdminDashboard() {
               style={{
                 fontFamily: "'Playfair Display', serif",
                 color: "#EAE6D8",
-                fontSize: "2.2rem",
+                fontSize: "clamp(1.8rem, 6vw, 2.2rem)",
                 fontWeight: 400,
                 lineHeight: 1.2,
               }}
@@ -148,7 +164,7 @@ export function AdminDashboard() {
 
         {/* Stats Row */}
         <div
-          className="grid grid-cols-4 gap-px mb-16"
+          className="grid grid-cols-2 md:grid-cols-4 gap-px mb-10 md:mb-16"
           style={{ backgroundColor: "rgba(234,230,216,0.08)" }}
         >
           {[
@@ -159,14 +175,14 @@ export function AdminDashboard() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="px-8 py-8"
+              className="px-4 md:px-8 py-6 md:py-8"
               style={{ backgroundColor: "#1F2828" }}
             >
               <p
                 style={{
                   fontFamily: "'Playfair Display', serif",
                   color: "#EAE6D8",
-                  fontSize: "1.8rem",
+                  fontSize: "clamp(1.3rem, 4.5vw, 1.8rem)",
                   fontWeight: 400,
                   marginBottom: "0.5rem",
                 }}
@@ -189,7 +205,7 @@ export function AdminDashboard() {
         </div>
 
         {/* Project Grid */}
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-8">
           {filteredProjects.map((project, index) => (
             <ProjectCard
               key={project.id}
@@ -301,7 +317,7 @@ function ProjectCard({ project, copiedId, onCopyLink, onClick }: ProjectCardProp
       </div>
 
       {/* Card Info */}
-      <div className="px-6 py-5 flex items-start justify-between">
+      <div className="px-4 md:px-6 py-4 md:py-5 flex items-start justify-between gap-3">
         <div>
           <h3
             style={{
@@ -315,7 +331,7 @@ function ProjectCard({ project, copiedId, onCopyLink, onClick }: ProjectCardProp
           >
             {project.coupleNames}
           </h3>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
             <p
               style={{
                 color: "#EAE6D8",
@@ -362,7 +378,7 @@ function ProjectCard({ project, copiedId, onCopyLink, onClick }: ProjectCardProp
 
       {/* Bottom border accent */}
       <div
-        className="h-px mx-6 transition-all duration-500"
+        className="h-px mx-4 md:mx-6 transition-all duration-500"
         style={{
           backgroundColor: "#EAE6D8",
           opacity: hovered ? 0.15 : 0,
@@ -394,7 +410,7 @@ function CreateAlbumModal({ formData, setFormData, onClose }: CreateAlbumModalPr
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg p-12"
+        className="relative w-full max-w-lg mx-4 p-6 md:p-12"
         style={{ backgroundColor: "#1F2828", border: "1px solid rgba(234,230,216,0.1)" }}
         onClick={(e) => e.stopPropagation()}
       >
