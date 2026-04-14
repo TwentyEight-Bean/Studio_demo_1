@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  coupleNames String
+  eventDate   DateTime?
+  location    String?
+  coverImage  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  gallery     Gallery?
+}
+
+model Gallery {
+  id         String   @id @default(cuid())
+  projectId  String   @unique
+  clientKey  String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  images     Image[]
+}
+
+model Image {
+  id         String   @id @default(cuid())
+  galleryId  String
+  publicId   String   @unique
+  secureUrl  String
+  alt        String?
+  width      Int?
+  height     Int?
+  createdAt  DateTime @default(now())
+  gallery    Gallery  @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  description  String
+  content      String
+  status       PostStatus @default(DRAFT)
+  publishedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  tags         PostTag[]
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  posts     Post[]
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  posts     PostTag[]
+}
+
+model PostTag {
+  postId String
+  tagId  String
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
